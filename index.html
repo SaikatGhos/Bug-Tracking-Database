@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BugTracker Lite</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <span class="bug-icon">🐞</span>
+        <h1>BugTracker Lite</h1>
+      </div>
+      <div class="header-actions">
+        <div class="connection-pill" id="connectionPill">
+          <span class="status-dot"></span>
+          <span id="connectionStatusText">Initializing...</span>
+        </div>
+        <button id="openAddModalBtn" class="btn btn-primary">+ Add New Bug</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Search & Filter Bar -->
+    <section class="card filter-card">
+      <div class="filter-header">
+        <div>
+          <h3>🔍 Search & Filter</h3>
+          <p class="subtitle">Search dynamically combines ID, Name, Sub ID, and Tag criteria.</p>
+        </div>
+      </div>
+      
+      <div class="filter-grid">
+        <div class="form-group">
+          <label for="searchId">Filter by ID</label>
+          <input type="text" id="searchId" placeholder="e.g. BUG-1001" />
+        </div>
+
+        <div class="form-group">
+          <label for="searchName">Filter by Name</label>
+          <select id="searchName">
+            <option value="">-- All Names --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="searchSubId">Filter by Sub ID</label>
+          <input type="text" id="searchSubId" placeholder="e.g. SUB-A1" />
+        </div>
+
+        <div class="form-group">
+          <label for="searchTag">Filter by Tag</label>
+          <input type="text" id="searchTag" placeholder="e.g. UI, Critical..." />
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button id="resetFiltersBtn" class="btn btn-outline btn-small">Reset Filters</button>
+        <span class="results-count" id="resultsCount">Showing 0 records</span>
+      </div>
+    </section>
+
+    <!-- Bug List Display Card -->
+    <section class="card">
+      <div class="table-header">
+        <h3>Bug Records</h3>
+        <button id="refreshDataBtn" class="btn btn-secondary btn-small">↻ Refresh Data</button>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="bug-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Sub ID</th>
+              <th>Tag</th>
+              <th>Description</th>
+              <th>Created At</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bugTableBody">
+            <tr>
+              <td colspan="7" class="text-center">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls Bar -->
+      <div class="pagination-bar">
+        <div class="rows-per-page">
+          <label for="pageSizeSelect">Rows per page:</label>
+          <select id="pageSizeSelect">
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+
+        <div class="pagination-controls">
+          <button id="prevPageBtn" class="btn btn-outline btn-small" disabled>&laquo; Prev</button>
+          <span id="pageIndicator" class="page-indicator">Page 1 of 1</span>
+          <button id="nextPageBtn" class="btn btn-outline btn-small" disabled>Next &raquo;</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add Bug Modal Form -->
+  <div class="modal-overlay hidden" id="addModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add New Bug Record</h2>
+        <button class="close-btn" id="closeAddModalBtn">&times;</button>
+      </div>
+      
+      <form id="addBugForm">
+        <div class="form-group">
+          <label for="bugId">ID <span class="optional">(Optional - Auto Generated if empty)</span></label>
+          <input type="text" id="bugId" placeholder="e.g. BUG-1005" />
+        </div>
+
+        <div class="form-group">
+          <label for="bugName">Name <span class="required">*</span></label>
+          <select id="bugName" required>
+            <option value="">-- Select Name --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="bugSubId">SUB ID</label>
+          <input type="text" id="bugSubId" placeholder="e.g. SUB-B2" />
+        </div>
+
+        <div class="form-group">
+          <label for="bugTag">Tag</label>
+          <input type="text" id="bugTag" placeholder="e.g. Frontend, Auth" />
+        </div>
+
+        <div class="form-group">
+          <label for="bugDescription">Description</label>
+          <textarea id="bugDescription" rows="4" placeholder="Enter details about the issue..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="clearFormBtn">Clear Form</button>
+          <button type="button" class="btn btn-outline" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitBugBtn">Submit Bug</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay hidden" id="deleteModal">
+    <div class="modal">
+      <div class="modal-header danger-header">
+        <h2>⚠️ Confirm Delete Record</h2>
+        <button class="close-btn" id="closeDeleteModalBtn">&times;</button>
+      </div>
+      
+      <p style="font-size: 0.9rem; color: #64748b;">Are you sure you want to permanently delete this bug record? This action cannot be undone.</p>
+
+      <!-- Bug Details Preview Card -->
+      <div class="delete-preview-box">
+        <p><strong>Bug ID:</strong> <span id="delBugId" class="id-badge"></span></p>
+        <p><strong>Name:</strong> <span id="delBugName"></span></p>
+        <p><strong>Sub ID:</strong> <span id="delBugSubId"></span></p>
+        <p><strong>Tag:</strong> <span id="delBugTag"></span></p>
+        <p><strong>Description:</strong> <span id="delBugDesc"></span></p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Record</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
