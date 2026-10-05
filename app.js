@@ -230,7 +230,7 @@ function populateNameDropdowns(options) {
   }
 }
 
-// Filter Logic
+// Replace getFilteredBugs in app.js
 function getFilteredBugs() {
   const filterId = (searchId ? searchId.value : '').trim().toLowerCase();
   const filterName = (searchName ? searchName.value : '').trim().toLowerCase();
@@ -238,13 +238,17 @@ function getFilteredBugs() {
   const filterTag = (searchTag ? searchTag.value : '').trim().toLowerCase();
 
   return state.bugs.filter(bug => {
-    const bId = (bug.ID || bug.id || '').toString().toLowerCase();
-    const bName = (bug.Name || bug.name || '').toString().toLowerCase();
+    const bId = (bug.ID || bug.id || '').toString().trim();
+    const bName = (bug.Name || bug.name || '').toString().trim();
+    
+    // Ignore completely empty rows
+    if (!bId && !bName) return false;
+
     const bSubId = (bug['Sub ID'] || bug.subId || '').toString().toLowerCase();
     const bTag = (bug.Tag || bug.tag || '').toString().toLowerCase();
 
-    if (filterId && !bId.includes(filterId)) return false;
-    if (filterName && bName !== filterName) return false;
+    if (filterId && !bId.toLowerCase().includes(filterId)) return false;
+    if (filterName && bName.toLowerCase() !== filterName) return false;
     if (filterSubId && !bSubId.includes(filterSubId)) return false;
     if (filterTag && !bTag.includes(filterTag)) return false;
 
